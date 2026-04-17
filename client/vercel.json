@@ -1,7 +1,9 @@
 {
-"rewrites": [
-{ "source": "/api/(.)", "destination": "https://final-du.onrender.com/api/$1" },
-{ "source": "/gifts/(.)", "destination": "https://final-du.onrender.com/gifts/$1" },
-{ "source": "/letters/(.*)", "destination": "https://final-du.onrender.com/letters/$1" }
-]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://final-du.onrender.com/api/$1" },
+    { "source": "/gifts/(.*)", "destination": "https://final-du.onrender.com/gifts/$1" },
+    { "source": "/letters/(.*)", "destination": "https://final-du.onrender.com/letters/$1" },
+
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
