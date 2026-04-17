@@ -1,0 +1,7 @@
+{
+"rewrites": [
+{ "source": "/api/(.)", "destination": "https://your-api.onrender.com/api/$1" },
+{ "source": "/gifts/(.)", "destination": "https://your-api.onrender.com/gifts/$1" },
+{ "source": "/letters/(.*)", "destination": "https://your-api.onrender.com/letters/$1" }
+]
+}
