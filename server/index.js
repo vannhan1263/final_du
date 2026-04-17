@@ -12,9 +12,6 @@ const GIFTS_DIR  = path.join(__dirname, 'gifts');
 const GIFTS_JSON = path.join(GIFTS_DIR, 'gifts.json');
 const LETTERS_DIR  = path.join(__dirname, 'letters');
 const LETTERS_JSON = path.join(LETTERS_DIR, 'letters.json');
-const CLIENT_BUILD_DIR = path.join(__dirname, '..', 'client', 'dist');
-const CLIENT_INDEX_HTML = path.join(CLIENT_BUILD_DIR, 'index.html');
-const HAS_CLIENT_BUILD = fs.existsSync(CLIENT_INDEX_HTML);
 
 /* ── Security headers ── */
 app.use(helmet({
@@ -40,11 +37,6 @@ app.use(express.json({ limit: '12mb' }));
 /* ── Serve saved gift images ── */
 app.use('/gifts', express.static(GIFTS_DIR));
 app.use('/letters', express.static(LETTERS_DIR));
-
-/* ── In production: serve compiled React app only if build exists ── */
-if (process.env.NODE_ENV === 'production' && HAS_CLIENT_BUILD) {
-  app.use(express.static(CLIENT_BUILD_DIR));
-}
 
 /* ── Ensure gifts/ folder exists ── */
 if (!fs.existsSync(GIFTS_DIR)) fs.mkdirSync(GIFTS_DIR, { recursive: true });
@@ -83,6 +75,11 @@ function inferImageExtFromDataUrl(dataUrl) {
 /* GET /api/health – health check endpoint for deploy platforms */
 app.get('/api/health', (_req, res) => {
   res.status(200).json({ ok: true, service: 'graduation-invite-api' });
+});
+
+/* GET / – simple root health for backend-only deploy */
+app.get('/', (_req, res) => {
+  res.status(200).json({ ok: true, message: 'Graduation Invite API is running' });
 });
 
 /* POST /api/gift – receive a gift */
@@ -239,17 +236,6 @@ app.delete('/api/letters/:id', (req, res) => {
   saveLetters(letters);
   res.json({ ok: true });
 });
-
-/* ── Production SPA fallback (only when frontend build exists) ── */
-if (process.env.NODE_ENV === 'production' && HAS_CLIENT_BUILD) {
-  app.get('*', (_req, res) => {
-    res.sendFile(CLIENT_INDEX_HTML);
-  });
-} else {
-  app.get('/', (_req, res) => {
-    res.status(200).json({ ok: true, message: 'Graduation Invite API is running' });
-  });
-}
 
 /* ── Start ── */
 function startServer(port) {
