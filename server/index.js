@@ -23,11 +23,33 @@ app.use(helmet({
 app.use(morgan('dev'));
 
 /* ── CORS ── */
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
+const defaultAllowedOrigins = [
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://final-du-beta.vercel.app'
+];
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || defaultAllowedOrigins.join(','))
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
+const previewOriginPatterns = [
+  /^https:\/\/[a-z0-9-]+\.vercel\.app$/i
+];
+
+function isOriginAllowed(origin) {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  return previewOriginPatterns.some(pattern => pattern.test(origin));
+}
+
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigins.some(o => o.trim() === origin)) cb(null, true);
-    else cb(new Error('Not allowed by CORS'));
+    if (isOriginAllowed(origin)) return cb(null, true);
+
+    const err = new Error(`Not allowed by CORS: ${origin}`);
+    err.status = 403;
+    return cb(err);
   }
 }));
 
@@ -235,6 +257,16 @@ app.delete('/api/letters/:id', (req, res) => {
   letters = letters.filter(item => item.id !== id);
   saveLetters(letters);
   res.json({ ok: true });
+});
+
+// Return a clear status code for blocked origins instead of generic 500.
+app.use((err, _req, res, next) => {
+  if (!err) return next();
+  if (err.message && err.message.startsWith('Not allowed by CORS')) {
+    return res.status(err.status || 403).json({ ok: false, error: 'CORS blocked origin' });
+  }
+
+  return next(err);
 });
 
 function startServer(port) {
