@@ -1,9 +1,31 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { Music2, Pause } from 'lucide-react';
+
+const LOCAL_AUDIO_CANDIDATES = [
+  '/assets/Baby.mp3',
+  '/Baby.mp3',
+  '../../assets/Baby.mp3'
+];
+const WEB_AUDIO_SRC = '';
+
+const resolveAudioSource = () => {
+  const params = new URLSearchParams(window.location.search);
+  const fromUrl = params.get('music');
+  if (fromUrl && /^(https?:\/\/|\/)/i.test(fromUrl)) return fromUrl;
+  return WEB_AUDIO_SRC;
+};
 
 export default function MusicPlayer() {
   const [playing, setPlaying] = useState(false);
-  const audioRef    = useRef(null);
+  const resolvedSrc = resolveAudioSource();
+  const [sourceIndex, setSourceIndex] = useState(0);
+  const audioRef = useRef(null);
   const noteTimerRef = useRef(null);
+
+  const candidateSources = resolvedSrc
+    ? [resolvedSrc]
+    : LOCAL_AUDIO_CANDIDATES;
+  const audioSrc = candidateSources[sourceIndex] || '';
 
   const spawnNote = useCallback(() => {
     const notes = ['♪', '♫', '♬'];
@@ -27,7 +49,7 @@ export default function MusicPlayer() {
   }, [spawnNote]);
 
   const toggleMusic = async () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !audioSrc) return;
     if (playing) {
       audioRef.current.pause();
       setPlaying(false);
@@ -49,36 +71,76 @@ export default function MusicPlayer() {
     return () => clearTimeout(noteTimerRef.current);
   }, [playing, scheduleNote]);
 
-  /* Try autoplay on first user interaction */
+  useEffect(() => {
+    if (!audioRef.current || !audioSrc) return;
+    audioRef.current.load();
+  }, [audioSrc]);
+
+  /* Try autoplay on load and on first interaction */
   useEffect(() => {
     const tryAutoplay = async () => {
-      if (!audioRef.current || playing) return;
-      try { await audioRef.current.play(); setPlaying(true); } catch { /* blocked */ }
+      if (!audioRef.current || playing || !audioSrc) return;
+      try {
+        await audioRef.current.play();
+        setPlaying(true);
+        return;
+      } catch {
+        // Browser may require muted autoplay first.
+      }
+
+      try {
+        audioRef.current.muted = true;
+        await audioRef.current.play();
+        audioRef.current.muted = false;
+        setPlaying(true);
+      } catch {
+        // Still blocked until user interacts.
+      }
     };
+
+    const tid = setTimeout(() => {
+      tryAutoplay();
+    }, 250);
+
     document.addEventListener('click',      tryAutoplay, { once: true });
     document.addEventListener('touchstart', tryAutoplay, { once: true });
     tryAutoplay();
     return () => {
+      clearTimeout(tid);
       document.removeEventListener('click',      tryAutoplay);
       document.removeEventListener('touchstart', tryAutoplay);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [audioSrc, playing]);
 
   return (
     <div className="music-player" id="music-player">
-      <audio ref={audioRef} loop>
-        {/* 🎵 Thay link nhạc của bạn vào đây */}
-        <source src="https://audio.com/emilis-pa/audio/justin-bieber-baby-ft-ludacris" type="audio/mpeg" />
-      </audio>
+      <audio
+        ref={audioRef}
+        loop
+        autoPlay
+        playsInline
+        src={audioSrc}
+        onCanPlay={() => {
+          if (!playing) {
+            audioRef.current?.play().then(() => setPlaying(true)).catch(() => {});
+          }
+        }}
+        onError={() => {
+          setPlaying(false);
+          if (sourceIndex < candidateSources.length - 1) {
+            setSourceIndex(prev => prev + 1);
+          }
+        }}
+      />
       <button
         className={`music-btn ${playing ? 'playing' : ''}`}
         onClick={toggleMusic}
         title="Bật / tắt nhạc"
+        disabled={!audioSrc}
       >
-        <i className={`fas ${playing ? 'fa-pause' : 'fa-music'}`}></i>
+        {playing ? <Pause size={18} /> : <Music2 size={18} />}
       </button>
-      <span className="music-label">{playing ? 'Đang phát' : 'Nhạc nền'}</span>
+      <span className="music-label">{audioSrc ? (playing ? 'Đang phát' : 'Nhạc nền') : 'Chưa có nhạc'}</span>
     </div>
   );
 }

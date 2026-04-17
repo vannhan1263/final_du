@@ -1,19 +1,20 @@
+import { CalendarDays, Clock3, MapPin } from 'lucide-react';
+
 export default function InfoCards() {
   const cards = [
     {
-      icon: 'fa-calendar-alt',
+      icon: CalendarDays,
       label: 'Ngày tổ chức',
       val: 'Thứ Sáu, 24/04/2026',
       sub: null
     },
     {
-      icon: 'fa-clock',
+      icon: Clock3,
       label: 'Thời gian',
-      val: '08:00 – 11:30',
-      sub: 'Đón khách từ 07:30'
+      val: '12:30 - 15:30',
     },
     {
-      icon: 'fa-map-marker-alt',
+      icon: MapPin,
       label: 'Địa điểm',
       val: 'Hội trường A',
       sub: 'Trường Đại học Tài chính - Marketing\n306 Võ Văn Hát, Long Trường, Hồ Chí Minh'
@@ -37,7 +38,7 @@ export default function InfoCards() {
               data-aos-delay={String((i + 1) * 100)}
             >
               <div className="info-icon-ring">
-                <i className={`fas ${c.icon}`}></i>
+                <c.icon size={22} />
               </div>
               <h3 className="info-label">{c.label}</h3>
               <p className="info-val">{c.val}</p>

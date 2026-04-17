@@ -309,7 +309,17 @@ export default function PhotoEditor() {
     try {
       await sendGiftApi({
         recipient: recipient || 'Khách',
-        bouquet:   bouquet.map(b => b.flowerDef.name).join(', ') || 'Không có hoa',
+        bouquet:   bouquet.map(b => b.itemDef?.name || '').filter(Boolean).join(', ') || 'Không có hoa',
+        bouquetLayout: bouquet.map((b, idx) => ({
+          id: b.itemDef?.id || `item_${idx}`,
+          name: b.itemDef?.name || 'Item',
+          group: b.itemDef?.group || 'flower',
+          x: Number(b.x ?? 50),
+          y: Number(b.y ?? 40),
+          rotation: Number(b.rotation ?? 0),
+          scale: Number(b.scale ?? 1),
+          svg: typeof b.itemDef?.svgFn === 'function' ? b.itemDef.svgFn() : ''
+        })),
         photo:     finalPhoto,
         timestamp: new Date().toLocaleString('vi-VN')
       });
@@ -339,9 +349,9 @@ export default function PhotoEditor() {
     <section className="section-light" id="anh-ky-niem">
       <div className="container">
         <div className="sec-head" data-aos="fade-up">
-          <h2 className="sec-title">Ảnh Kỷ Niệm Của Chúng Ta 📸</h2>
+          <h2 className="sec-title">Ảnh Dìm</h2>
           <div className="sec-bar"></div>
-          <p className="photo-subtitle">Tải ảnh lên, chỉnh bộ lọc, thêm nhãn dán, vẽ rồi gửi kèm bó hoa nhé!</p>
+          <p className="photo-subtitle">Chỉnh sửa ảnh cho vui nhe bồ</p>
         </div>
 
         <div className="photo-editor-wrap" data-aos="fade-up" data-aos-delay="100">

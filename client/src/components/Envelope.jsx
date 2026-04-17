@@ -1,12 +1,57 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Heart, MousePointer2, X, CalendarDays, Clock, MapPin } from 'lucide-react';
+import { Heart, MousePointer2, X } from 'lucide-react';
+import { getLetterByIdApi } from '../utils/api.js';
 
 export default function Envelope() {
   const [envOpen, setEnvOpen]         = useState(false);
   const [letterVisible, setLetterVisible] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const [searchParams] = useSearchParams();
-  const letterSrc = searchParams.get('letter') || '/letter.jpg';
+  const [letterSrc, setLetterSrc] = useState('/letter-invite.jpg');
+
+  useEffect(() => {
+    const directLetter = searchParams.get('letter');
+    const lid = searchParams.get('lid');
+
+    if (directLetter) {
+      setImgError(false);
+      setLetterSrc(directLetter);
+      return;
+    }
+
+    if (!lid) {
+      setImgError(false);
+      setLetterSrc('/letter-invite.jpg');
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const data = await getLetterByIdApi(lid);
+        const file = data?.letter?.letterFile;
+        if (!cancelled && file) {
+          setImgError(false);
+          setLetterSrc(`/letters/${file}`);
+        }
+        if (!cancelled && !file) {
+          setImgError(false);
+          setLetterSrc('/letter-invite.jpg');
+        }
+      } catch {
+        if (!cancelled) {
+          setImgError(false);
+          setLetterSrc('/letter-invite.jpg');
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchParams]);
 
   const handleEnvelopeClick = () => {
     if (envOpen) return;
@@ -26,11 +71,6 @@ export default function Envelope() {
   return (
     <section className="section-light" id="la-thu">
       <div className="container" style={{ textAlign: 'center' }}>
-        <div data-aos="fade-up">
-          <h2 className="sec-title">Lá Thư Mời</h2>
-          <div className="sec-bar"></div>
-          <p className="env-hint-top">Nhấn vào phong bì để mở thư 💌</p>
-        </div>
 
         {/* ── Envelope ── */}
         <div
@@ -49,10 +89,6 @@ export default function Envelope() {
             <Heart size={18} fill="currentColor" />
           </div>
           <div className="env-letter" id="env-letter">
-            <div className="env-letter-inner">
-              <span style={{ fontSize: '26px' }}>🎓</span>
-              <span className="env-letter-label">Lá thư mời</span>
-            </div>
           </div>
           <p className="env-click-hint" id="env-click-hint">
             <MousePointer2 size={13} style={{ marginRight: '4px', display: 'inline', verticalAlign: 'middle' }} />Nấn để mở
@@ -77,46 +113,24 @@ export default function Envelope() {
           </button>
 
           <div className="letter-body-inner">
-            <img
-              id="letter-canva-img"
-              src={letterSrc}
-              alt="Lá thư mời"
-              className="letter-canva-img"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-                document.getElementById('letter-fallback').style.display = 'block';
-              }}
-            />
-            <div id="letter-fallback" style={{ display: 'none' }}>
-              <div className="letter-deco-top">🎓</div>
-              <h2 className="letter-heading">Thư Mời Tốt Nghiệp</h2>
-              <div className="letter-hr">
-                <span></span>
-                <Heart size={12} color="#f9a8c9" fill="#f9a8c9" />
-                <span></span>
-              </div>
-              <p className="letter-greeting">Kính gửi bạn thân mến,</p>
-              <p className="letter-text">
-                Sau những năm tháng miệt mài trên giảng đường, hôm nay mình vô cùng hạnh phúc
-                khi chính thức nhận được tấm bằng <strong>Cử nhân Marketing</strong>.
+            {!imgError && (
+              <img
+                key={letterSrc}
+                id="letter-canva-img"
+                src={letterSrc}
+                alt="Lá thư mời"
+                className="letter-canva-img"
+                onLoad={() => setImgError(false)}
+                onError={() => {
+                  setImgError(true);
+                }}
+              />
+            )}
+            {imgError && (
+              <p style={{ color: '#6b7280', fontSize: '14px', margin: 0 }}>
+                Không tải được ảnh lá thư. Vui lòng kiểm tra lại link hoặc upload lại ảnh trong trang admin.
               </p>
-              <div className="letter-event-box">
-                <div className="letter-event-row">
-                  <CalendarDays size={14} />
-                  <span>Thứ Sáu, 24/04/2026</span>
-                </div>
-                <div className="letter-event-row">
-                  <Clock size={14} />
-                  <span>08:00 – 11:30</span>
-                </div>
-                <div className="letter-event-row">
-                  <MapPin size={14} />
-                  <span>Hội trường A – Trường ĐH Tài chính - Marketing</span>
-                </div>
-              </div>
-              <p className="letter-closing">Mong được đón tiếp bạn!</p>
-              <p className="letter-signature">Nguyễn Ngọc Minh Châu</p>
-            </div>
+            )}
           </div>
         </div>
       </div>

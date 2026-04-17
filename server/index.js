@@ -10,6 +10,8 @@ const app      = express();
 const PORT     = process.env.PORT || 3001;
 const GIFTS_DIR  = path.join(__dirname, 'gifts');
 const GIFTS_JSON = path.join(GIFTS_DIR, 'gifts.json');
+const LETTERS_DIR  = path.join(__dirname, 'letters');
+const LETTERS_JSON = path.join(LETTERS_DIR, 'letters.json');
 
 /* ── Security headers ── */
 app.use(helmet({
@@ -34,6 +36,7 @@ app.use(express.json({ limit: '12mb' }));
 
 /* ── Serve saved gift images ── */
 app.use('/gifts', express.static(GIFTS_DIR));
+app.use('/letters', express.static(LETTERS_DIR));
 
 /* ── In production: serve compiled React app ── */
 if (process.env.NODE_ENV === 'production') {
@@ -43,6 +46,7 @@ if (process.env.NODE_ENV === 'production') {
 
 /* ── Ensure gifts/ folder exists ── */
 if (!fs.existsSync(GIFTS_DIR)) fs.mkdirSync(GIFTS_DIR, { recursive: true });
+if (!fs.existsSync(LETTERS_DIR)) fs.mkdirSync(LETTERS_DIR, { recursive: true });
 
 /* ── Helpers ── */
 function loadGifts() {
@@ -54,11 +58,29 @@ function saveGifts(gifts) {
   fs.writeFileSync(GIFTS_JSON, JSON.stringify(gifts, null, 2), 'utf8');
 }
 
+function loadLetters() {
+  if (!fs.existsSync(LETTERS_JSON)) return [];
+  try { return JSON.parse(fs.readFileSync(LETTERS_JSON, 'utf8')); }
+  catch { return []; }
+}
+
+function saveLetters(letters) {
+  fs.writeFileSync(LETTERS_JSON, JSON.stringify(letters, null, 2), 'utf8');
+}
+
+function inferImageExtFromDataUrl(dataUrl) {
+  const matched = /^data:image\/(\w+);base64,/.exec(dataUrl || '');
+  const ext = (matched?.[1] || 'jpg').toLowerCase();
+  if (ext === 'jpeg') return 'jpg';
+  if (['jpg', 'png', 'webp'].includes(ext)) return ext;
+  return 'jpg';
+}
+
 /* ─────────────────── API ROUTES ─────────────────── */
 
 /* POST /api/gift – receive a gift */
 app.post('/api/gift', (req, res) => {
-  const { recipient, bouquet, photo, timestamp } = req.body;
+  const { recipient, bouquet, bouquetLayout, photo, timestamp } = req.body;
 
   // Input validation
   if (typeof recipient !== 'string') return res.status(400).json({ ok: false, error: 'Invalid recipient' });
@@ -86,6 +108,18 @@ app.post('/api/gift', (req, res) => {
     id,
     recipient: String(recipient || 'Khách').slice(0, 100),
     bouquet:   String(bouquet   || '').slice(0, 500),
+    bouquetLayout: Array.isArray(bouquetLayout)
+      ? bouquetLayout.slice(0, 40).map(item => ({
+          id: String(item?.id || ''),
+          name: String(item?.name || '').slice(0, 80),
+          group: String(item?.group || 'flower').slice(0, 30),
+          x: Number(item?.x ?? 50),
+          y: Number(item?.y ?? 40),
+          rotation: Number(item?.rotation ?? 0),
+          scale: Number(item?.scale ?? 1),
+          svg: String(item?.svg || '').slice(0, 3000)
+        }))
+      : [],
     photoFile,
     timestamp: String(timestamp || new Date().toLocaleString('vi-VN')).slice(0, 50),
     createdAt: new Date().toISOString()
@@ -117,6 +151,85 @@ app.delete('/api/gifts/:id', (req, res) => {
   }
   gifts = gifts.filter(g => g.id !== id);
   saveGifts(gifts);
+  res.json({ ok: true });
+});
+
+/* POST /api/letters – upload and create a personal letter link */
+app.post('/api/letters', (req, res) => {
+  const { recipient, letterImage } = req.body;
+
+  if (typeof recipient !== 'string' || !recipient.trim()) {
+    return res.status(400).json({ ok: false, error: 'Invalid recipient' });
+  }
+  if (typeof letterImage !== 'string' || !letterImage.startsWith('data:image')) {
+    return res.status(400).json({ ok: false, error: 'Invalid letter image' });
+  }
+
+  const id = Date.now();
+  const base64 = letterImage.replace(/^data:image\/\w+;base64,/, '');
+  const buf = Buffer.from(base64, 'base64');
+  const MAX_LETTER_BYTES = 10 * 1024 * 1024; // 10 MB
+  if (buf.length < 500 || buf.length > MAX_LETTER_BYTES) {
+    return res.status(400).json({ ok: false, error: 'Letter image size out of range' });
+  }
+
+  const ext = inferImageExtFromDataUrl(letterImage);
+  const letterFile = `letter_${id}.${ext}`;
+
+  try {
+    fs.writeFileSync(path.join(LETTERS_DIR, letterFile), buf);
+  } catch (e) {
+    return res.status(500).json({ ok: false, error: `Cannot save image: ${e.message}` });
+  }
+
+  const cleanRecipient = String(recipient).trim().slice(0, 100);
+  const letters = loadLetters();
+  const letter = {
+    id,
+    recipient: cleanRecipient,
+    letterFile,
+    createdAt: new Date().toISOString()
+  };
+
+  letters.unshift(letter);
+  saveLetters(letters);
+
+  const link = `/?to=${encodeURIComponent(cleanRecipient)}&lid=${id}`;
+  res.json({ ok: true, letter, link });
+});
+
+/* GET /api/letters – list all personal letter links */
+app.get('/api/letters', (_req, res) => {
+  res.json(loadLetters());
+});
+
+/* GET /api/letters/:id – resolve letter by id (for Envelope) */
+app.get('/api/letters/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ ok: false, error: 'Invalid id' });
+
+  const letter = loadLetters().find(item => item.id === id);
+  if (!letter) return res.status(404).json({ ok: false, error: 'Letter not found' });
+
+  res.json({ ok: true, letter });
+});
+
+/* DELETE /api/letters/:id – remove personal letter link and image */
+app.delete('/api/letters/:id', (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id)) return res.status(400).json({ ok: false, error: 'Invalid id' });
+
+  let letters = loadLetters();
+  const letter = letters.find(item => item.id === id);
+  if (!letter) return res.status(404).json({ ok: false, error: 'Letter not found' });
+
+  if (letter.letterFile) {
+    const fp = path.join(LETTERS_DIR, letter.letterFile);
+    if (fs.existsSync(fp)) fs.unlinkSync(fp);
+  }
+
+  letters = letters.filter(item => item.id !== id);
+  saveLetters(letters);
   res.json({ ok: true });
 });
 

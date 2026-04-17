@@ -1,6 +1,6 @@
 import { useCountdown } from '../hooks/useCountdown.js';
 
-const TARGET_DATE = '2026-06-20T08:00:00';
+const TARGET_DATE = '2026-04-24T12:00:00';
 
 export default function CountdownSection() {
   const { days, hours, minutes, seconds } = useCountdown(TARGET_DATE);
@@ -9,7 +9,7 @@ export default function CountdownSection() {
     <section className="section-dark" id="dem-nguoc">
       <div className="container" style={{ textAlign: 'center' }}>
         <div data-aos="fade-up">
-          <h2 className="sec-title light">Đếm Ngược Đến Ngày Trọng Đại</h2>
+          <h2 className="sec-title light">Đếm Ngược Đến Ngày Nè</h2>
           <div className="sec-bar light"></div>
         </div>
 

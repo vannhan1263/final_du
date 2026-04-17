@@ -3,11 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import { useApp } from '../context/AppContext.jsx';
 import { launchConfetti } from '../utils/confetti.js';
 import MusicPlayer      from '../components/MusicPlayer.jsx';
+import PickupAssistant  from '../components/PickupAssistant.jsx';
 import Hero             from '../components/Hero.jsx';
 import InfoCards        from '../components/InfoCards.jsx';
 import CountdownSection from '../components/CountdownSection.jsx';
 import Envelope         from '../components/Envelope.jsx';
-import FlowerSection    from '../components/FlowerSection.jsx';
 import PhotoEditor      from '../components/PhotoEditor.jsx';
 import MapSection       from '../components/MapSection.jsx';
 import Footer           from '../components/Footer.jsx';
@@ -48,6 +48,7 @@ export default function HomePage() {
     <>
       {/* Floating music player */}
       <MusicPlayer />
+      <PickupAssistant />
 
       {/* Confetti canvas (shared across page) */}
       <canvas
@@ -60,7 +61,6 @@ export default function HomePage() {
       <InfoCards />
       <CountdownSection />
       <Envelope />
-      <FlowerSection />
       <PhotoEditor />
       <MapSection />
       <Footer />

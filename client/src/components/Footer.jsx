@@ -4,7 +4,6 @@ export default function Footer() {
   return (
     <footer className="footer-section">
       <div className="container" style={{ textAlign: 'center' }}>
-        <div className="footer-hearts">💛 💙 💜 💖</div>
         <p style={{ fontFamily: "'Great Vibes', cursive", fontSize: '2.5rem', color: '#ffd700', marginBottom: '6px' }}>
           Nguyễn Ngọc Minh Châu
         </p>
