@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
+import avatarImg from '../../assets/image/pickup-host.png';
+import schoolMapImg from '../../assets/image/school-map.png';
 
-const AVATAR_IMAGE = '/images/pickup-host.png';
-const SCHOOL_MAP_IMAGE = '/images/school-map.png';
-
+const AVATAR_IMAGE = avatarImg;
+const SCHOOL_MAP_IMAGE = schoolMapImg;
 const POPUP_CONTENT = {
   title: 'Hi, mình là Nhân 2004',
   subtitle: 'Mình là "trợ lý tốt nghiệp của Châu".',
