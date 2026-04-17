@@ -349,9 +349,9 @@ export default function PhotoEditor() {
     <section className="section-light" id="anh-ky-niem">
       <div className="container">
         <div className="sec-head" data-aos="fade-up">
-          <h2 className="sec-title">Ảnh Dìm</h2>
+          <h2 className="sec-title">PHOTOBOOTH MINI</h2>
           <div className="sec-bar"></div>
-          <p className="photo-subtitle">Chỉnh sửa ảnh cho vui nhe bồ</p>
+          <p className="photo-subtitle">des xong gửi ảnh tặng Châu nhaaa</p>
         </div>
 
         <div className="photo-editor-wrap" data-aos="fade-up" data-aos-delay="100">

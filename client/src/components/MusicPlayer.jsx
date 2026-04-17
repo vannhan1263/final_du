@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Music2, Pause } from 'lucide-react';
+import babyAudio from '../../assets/Baby.mp3';
 
 const LOCAL_AUDIO_CANDIDATES = [
-  '/assets/Baby.mp3',
-  '/Baby.mp3',
-  '../../assets/Baby.mp3'
+  babyAudio
 ];
 const WEB_AUDIO_SRC = '';
 
