@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
-const AVATAR_IMAGE = '../../assets/image/pickup-host.png';
-const SCHOOL_MAP_IMAGE = '../../assets/image/school-map.png';
+const AVATAR_IMAGE = '/images/pickup-host.png';
+const SCHOOL_MAP_IMAGE = '/images/school-map.png';
 
 const POPUP_CONTENT = {
   title: 'Hi, mình là Nhân 2004',
