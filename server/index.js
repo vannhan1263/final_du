@@ -237,21 +237,14 @@ app.delete('/api/letters/:id', (req, res) => {
   res.json({ ok: true });
 });
 
-/* ── Start ── */
 function startServer(port) {
-  const srv = app.listen(port, () => {
+  app.listen(port, () => {
     console.log('');
-    console.log('  🎓  Graduation Invite API');
-    console.log(`  ➜   http://localhost:${port}/api`);
-    console.log(`  ➜   Mode: ${process.env.NODE_ENV || 'development'}`);
+    console.log('🎓 Graduation Invite API');
+    console.log(`Running on port ${port}`);
+    console.log(`Mode: ${process.env.NODE_ENV || 'development'}`);
     console.log('');
-  });
-  srv.on('error', err => {
-    if (err.code === 'EADDRINUSE') {
-      console.log(`  ⚠️   Port ${port} busy, trying ${port + 1}...`);
-      startServer(port + 1);
-    } else { throw err; }
   });
 }
 
-startServer(PORT);
+startServer(process.env.PORT || 3001);
