@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": 1776481274144030,
+    "recipient": "DFSF",
+    "letterFile": "letter_1776481274144030.png",
+    "letterUrl": null,
+    "letterPublicId": null,
+    "createdAt": "2026-04-18T03:01:16.749Z"
+  },
+  {
+    "id": 1776481577946725,
+    "recipient": "sdf",
+    "letterFile": "letter_1776481577946725.png",
+    "letterUrl": null,
+    "letterPublicId": null,
+    "createdAt": "2026-04-18T03:06:20.929Z"
+  }
+]

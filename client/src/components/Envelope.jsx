@@ -31,12 +31,17 @@ export default function Envelope() {
     (async () => {
       try {
         const data = await getLetterByIdApi(lid);
+        const cloudUrl = data?.letter?.letterUrl;
         const file = data?.letter?.letterFile;
-        if (!cancelled && file) {
+        if (!cancelled && cloudUrl) {
+          setImgError(false);
+          setLetterSrc(cloudUrl);
+        }
+        if (!cancelled && !cloudUrl && file) {
           setImgError(false);
           setLetterSrc(`/letters/${file}`);
         }
-        if (!cancelled && !file) {
+        if (!cancelled && !cloudUrl && !file) {
           setImgError(false);
           setLetterSrc('/letter-invite.jpg');
         }

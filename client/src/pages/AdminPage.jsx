@@ -27,6 +27,18 @@ function normalizeBouquetLayout(raw) {
   return [];
 }
 
+function resolveGiftImage(gift) {
+  if (gift?.photoUrl) return gift.photoUrl;
+  if (gift?.photoFile) return `/gifts/${gift.photoFile}`;
+  return null;
+}
+
+function resolveLetterImage(letter) {
+  if (letter?.letterUrl) return letter.letterUrl;
+  if (letter?.letterFile) return `/letters/${letter.letterFile}`;
+  return null;
+}
+
 export default function AdminPage() {
   const [gifts,       setGifts]      = useState([]);
   const [letters,     setLetters]    = useState([]);
@@ -232,10 +244,11 @@ export default function AdminPage() {
             {letters.map(letter => {
               const relativeLink = makeLetterPath(letter.recipient, letter.id);
               const fullLink = `${window.location.origin}${relativeLink}`;
+              const letterImage = resolveLetterImage(letter);
 
               return (
                 <div className="adm-letter-item" key={letter.id}>
-                  <img src={`/letters/${letter.letterFile}`} alt={letter.recipient} className="adm-letter-thumb" />
+                  <img src={letterImage || '/letter-invite.jpg'} alt={letter.recipient} className="adm-letter-thumb" />
 
                   <div className="adm-letter-content">
                     <div className="adm-letter-row1">
@@ -279,7 +292,8 @@ export default function AdminPage() {
           <div className="adm-grid">
             {filtered.map(g => {
               const bouquetLayout = normalizeBouquetLayout(g.bouquetLayout);
-              const hasPhoto = Boolean(g.photoFile);
+              const photoSrc = resolveGiftImage(g);
+              const hasPhoto = Boolean(photoSrc);
 
               return (
               <div className="adm-card" key={g.id}>
@@ -287,11 +301,11 @@ export default function AdminPage() {
                 {/* Photo */}
                 <div
                   className="adm-card-photo"
-                  onClick={() => g.photoFile && setLightboxImg(`/gifts/${g.photoFile}`)}
-                  style={{ cursor: g.photoFile ? 'pointer' : 'default' }}
+                  onClick={() => photoSrc && setLightboxImg(photoSrc)}
+                  style={{ cursor: photoSrc ? 'pointer' : 'default' }}
                 >
-                  {g.photoFile
-                    ? <img src={`/gifts/${g.photoFile}`} alt={g.recipient} loading="lazy" />
+                  {photoSrc
+                    ? <img src={photoSrc} alt={g.recipient} loading="lazy" />
                     : <div className="adm-no-photo"><ImageIcon size={28} /><span>Không có ảnh</span></div>
                   }
                   {bouquetLayout.length > 0 && (
@@ -312,8 +326,8 @@ export default function AdminPage() {
                       ))}
                     </div>
                   )}
-                  {g.photoFile && <div className="adm-photo-zoom"><Expand size={20} /></div>}
-                  {g.photoFile && <div className="adm-photo-badge"><Camera size={10} /></div>}
+                  {photoSrc && <div className="adm-photo-zoom"><Expand size={20} /></div>}
+                  {photoSrc && <div className="adm-photo-badge"><Camera size={10} /></div>}
                 </div>
 
                 {/* Body */}
@@ -334,8 +348,8 @@ export default function AdminPage() {
                   )}
 
                   <div className="adm-card-actions">
-                    {g.photoFile && (
-                      <a href={`/gifts/${g.photoFile}`} target="_blank" rel="noreferrer"
+                    {photoSrc && (
+                      <a href={photoSrc} target="_blank" rel="noreferrer"
                         className="adm-btn adm-btn-dl" title="Tải ảnh">
                         <Download size={12} /> Tải ảnh
                       </a>

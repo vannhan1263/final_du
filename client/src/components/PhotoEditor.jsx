@@ -102,10 +102,16 @@ const buildFilters = (state) => {
 
 /* ════════════════════════════════════ */
 export default function PhotoEditor() {
-  const { bouquet, recipient } = useApp();
+  const { bouquet, recipient, setPhotoEditorActive } = useApp();
 
   /* steps */
   const [step,         setStep]         = useState('upload');
+
+  // Notify context so PickupAssistant can hide/show.
+  useEffect(() => {
+    setPhotoEditorActive(step === 'editor');
+    return () => setPhotoEditorActive(false);
+  }, [step, setPhotoEditorActive]);
   const [activeTab,    setActiveTab]     = useState('filter');
 
   /* photo */

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import avatarImg from '../../assets/image/pickup-host.png';
 import schoolMapImg from '../../assets/image/school-map.png';
+import { useApp } from '../context/AppContext.jsx';
 
 const AVATAR_IMAGE = avatarImg;
 const SCHOOL_MAP_IMAGE = schoolMapImg;
@@ -19,6 +20,7 @@ const POPUP_CONTENT = {
 };
 
 export default function PickupAssistant() {
+  const { photoEditorActive } = useApp();
   const [open, setOpen] = useState(false);
   const [imgBroken, setImgBroken] = useState(false);
   const [mapBroken, setMapBroken] = useState(false);
@@ -33,6 +35,8 @@ export default function PickupAssistant() {
 
     return () => clearInterval(tid);
   }, []);
+
+  if (photoEditorActive) return null;
 
   return (
     <>

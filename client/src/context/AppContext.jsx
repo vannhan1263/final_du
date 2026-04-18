@@ -7,6 +7,7 @@ export function AppProvider({ children }) {
   const [counts, setCounts]   = useState({});   // { id -> count }
   const [photoDataURL, setPhotoDataURL] = useState(null);
   const [recipient, setRecipient] = useState('Khách');
+  const [photoEditorActive, setPhotoEditorActive] = useState(false);
 
   const addBouquetItem = (itemDef, position = { x: 50, y: 40 }) => {
     const randomRotation = itemDef.group === 'bow'
@@ -40,7 +41,8 @@ export function AppProvider({ children }) {
       addFlower,
       resetBouquet,
       photoDataURL, setPhotoDataURL,
-      recipient, setRecipient
+      recipient, setRecipient,
+      photoEditorActive, setPhotoEditorActive
     }}>
       {children}
     </AppContext.Provider>

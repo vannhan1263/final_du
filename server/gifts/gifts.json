@@ -1,1 +1,24 @@
-[]
+[
+  {
+    "id": 1776481406185519,
+    "recipient": "DFSF",
+    "bouquet": "Không có hoa",
+    "bouquetLayout": [],
+    "photoFile": "gift_1776481406185519.jpg",
+    "photoUrl": null,
+    "photoPublicId": null,
+    "timestamp": "10:03:26 18/4/2026",
+    "createdAt": "2026-04-18T03:03:27.459Z"
+  },
+  {
+    "id": 1776481672409100,
+    "recipient": "Khách",
+    "bouquet": "Không có hoa",
+    "bouquetLayout": [],
+    "photoFile": "gift_1776481672409100.jpg",
+    "photoUrl": null,
+    "photoPublicId": null,
+    "timestamp": "10:07:52 18/4/2026",
+    "createdAt": "2026-04-18T03:07:53.648Z"
+  }
+]
