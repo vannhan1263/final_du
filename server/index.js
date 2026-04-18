@@ -3,7 +3,13 @@ const dns      = require('dns');
 // Force Node.js to use Google DNS for SRV resolution (fixes Windows querySrv ECONNREFUSED).
 dns.setServers(['8.8.8.8', '8.8.4.4']);
 dns.setDefaultResultOrder('ipv4first');
+process.on("uncaughtException", (err) => {
+  console.error("UNCAUGHT EXCEPTION:", err);
+});
 
+process.on("unhandledRejection", (err) => {
+  console.error("UNHANDLED REJECTION:", err);
+});
 const express  = require('express');
 const path     = require('path');
 const fs       = require('fs');
