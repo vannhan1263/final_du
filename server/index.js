@@ -62,7 +62,9 @@ app.use(morgan('dev'));
 const defaultAllowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
-  'https://final-du-beta.vercel.app'
+  'https://final-du-beta.vercel.app',
+  'https://www.minhchausgraduation.online/'
+
 ];
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || defaultAllowedOrigins.join(','))
   .split(',')
