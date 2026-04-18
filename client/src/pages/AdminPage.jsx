@@ -214,7 +214,7 @@ export default function AdminPage() {
             <label><UserRound size={13} /> Gửi cho ai</label>
             <input
               type="text"
-              placeholder="Ví dụ: Trần Ngọc Anh"
+              placeholder="Ví dụ: Du xinh dep tuyet tran"
               value={letterRecipient}
               onChange={e => setLetterRecipient(e.target.value)}
               maxLength={100}

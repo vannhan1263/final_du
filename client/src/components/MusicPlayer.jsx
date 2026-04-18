@@ -20,6 +20,7 @@ export default function MusicPlayer() {
   const [sourceIndex, setSourceIndex] = useState(0);
   const audioRef = useRef(null);
   const noteTimerRef = useRef(null);
+  const autoplayArmedRef = useRef(true);
 
   const candidateSources = resolvedSrc
     ? [resolvedSrc]
@@ -49,14 +50,14 @@ export default function MusicPlayer() {
 
   const toggleMusic = async () => {
     if (!audioRef.current || !audioSrc) return;
+    autoplayArmedRef.current = false;
+
     if (playing) {
       audioRef.current.pause();
-      setPlaying(false);
       clearTimeout(noteTimerRef.current);
     } else {
       try {
         await audioRef.current.play();
-        setPlaying(true);
       } catch { /* autoplay blocked */ }
     }
   };
@@ -73,15 +74,17 @@ export default function MusicPlayer() {
   useEffect(() => {
     if (!audioRef.current || !audioSrc) return;
     audioRef.current.load();
+    autoplayArmedRef.current = true;
   }, [audioSrc]);
 
   /* Try autoplay on load and on first interaction */
   useEffect(() => {
     const tryAutoplay = async () => {
-      if (!audioRef.current || playing || !audioSrc) return;
+      if (!audioRef.current || playing || !audioSrc || !autoplayArmedRef.current) return;
+
       try {
         await audioRef.current.play();
-        setPlaying(true);
+        autoplayArmedRef.current = false;
         return;
       } catch {
         // Browser may require muted autoplay first.
@@ -91,23 +94,28 @@ export default function MusicPlayer() {
         audioRef.current.muted = true;
         await audioRef.current.play();
         audioRef.current.muted = false;
-        setPlaying(true);
+        autoplayArmedRef.current = false;
       } catch {
         // Still blocked until user interacts.
       }
+    };
+
+    const handleFirstInteraction = (event) => {
+      if (event.target?.closest('.music-btn')) return;
+      tryAutoplay();
     };
 
     const tid = setTimeout(() => {
       tryAutoplay();
     }, 250);
 
-    document.addEventListener('click',      tryAutoplay, { once: true });
-    document.addEventListener('touchstart', tryAutoplay, { once: true });
+    document.addEventListener('click', handleFirstInteraction, { once: true });
+    document.addEventListener('touchstart', handleFirstInteraction, { once: true });
     tryAutoplay();
     return () => {
       clearTimeout(tid);
-      document.removeEventListener('click',      tryAutoplay);
-      document.removeEventListener('touchstart', tryAutoplay);
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
     };
   }, [audioSrc, playing]);
 
@@ -116,22 +124,20 @@ export default function MusicPlayer() {
       <audio
         ref={audioRef}
         loop
-        autoPlay
         playsInline
         src={audioSrc}
-        onCanPlay={() => {
-          if (!playing) {
-            audioRef.current?.play().then(() => setPlaying(true)).catch(() => {});
-          }
-        }}
+        onPlay={() => setPlaying(true)}
+        onPause={() => setPlaying(false)}
         onError={() => {
           setPlaying(false);
+          autoplayArmedRef.current = false;
           if (sourceIndex < candidateSources.length - 1) {
             setSourceIndex(prev => prev + 1);
           }
         }}
       />
       <button
+        type="button"
         className={`music-btn ${playing ? 'playing' : ''}`}
         onClick={toggleMusic}
         title="Bật / tắt nhạc"
