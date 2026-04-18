@@ -57,6 +57,8 @@ export default function MusicPlayer() {
       clearTimeout(noteTimerRef.current);
     } else {
       try {
+        audioRef.current.muted = false;
+        audioRef.current.volume = 1;
         await audioRef.current.play();
       } catch { /* autoplay blocked */ }
     }
@@ -83,20 +85,13 @@ export default function MusicPlayer() {
       if (!audioRef.current || playing || !audioSrc || !autoplayArmedRef.current) return;
 
       try {
+        audioRef.current.muted = false;
+        audioRef.current.volume = 1;
         await audioRef.current.play();
         autoplayArmedRef.current = false;
         return;
       } catch {
-        // Browser may require muted autoplay first.
-      }
-
-      try {
-        audioRef.current.muted = true;
-        await audioRef.current.play();
-        audioRef.current.muted = false;
-        autoplayArmedRef.current = false;
-      } catch {
-        // Still blocked until user interacts.
+        // Browser is still blocking audio until a real user interaction.
       }
     };
 
