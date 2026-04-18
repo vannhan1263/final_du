@@ -63,13 +63,21 @@ const defaultAllowedOrigins = [
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://final-du-beta.vercel.app',
-  'https://www.minhchausgraduation.online/'
-
+  'https://www.minhchausgraduation.online',
+  'https://minhchausgraduation.online'
 ];
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || defaultAllowedOrigins.join(','))
+
+const normalizeOrigin = (value = '') => value.trim().replace(/\/+$/, '');
+
+const envAllowedOrigins = (process.env.ALLOWED_ORIGINS || '')
   .split(',')
-  .map(o => o.trim())
+  .map(normalizeOrigin)
   .filter(Boolean);
+
+const allowedOrigins = [...new Set([
+  ...defaultAllowedOrigins,
+  ...envAllowedOrigins
+].map(normalizeOrigin).filter(Boolean))];
 
 const previewOriginPatterns = [
   /^https:\/\/[a-z0-9-]+\.vercel\.app$/i
@@ -77,8 +85,9 @@ const previewOriginPatterns = [
 
 function isOriginAllowed(origin) {
   if (!origin) return true;
-  if (allowedOrigins.includes(origin)) return true;
-  return previewOriginPatterns.some(pattern => pattern.test(origin));
+  const normalizedOrigin = normalizeOrigin(origin);
+  if (allowedOrigins.includes(normalizedOrigin)) return true;
+  return previewOriginPatterns.some(pattern => pattern.test(normalizedOrigin));
 }
 
 app.use(cors({
