@@ -96,7 +96,7 @@ export default function Envelope() {
           <div className="env-letter" id="env-letter">
           </div>
           <p className="env-click-hint" id="env-click-hint">
-            <MousePointer2 size={13} style={{ marginRight: '4px', display: 'inline', verticalAlign: 'middle' }} />Nấn để mở
+            <MousePointer2 size={13} style={{ marginRight: '4px', display: 'inline', verticalAlign: 'middle' }} />Bạn hãy vỗ tay và thiệp sẽ không mở, bạn nhấn thì mới mở
           </p>
         </div>
       </div>
