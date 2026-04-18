@@ -11,7 +11,7 @@ export default function InfoCards() {
     {
       icon: Clock3,
       label: 'Thời gian',
-      val: '12:30 - 15:30',
+      val: '15:30 - 17:00',
     },
     {
       icon: MapPin,

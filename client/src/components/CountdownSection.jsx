@@ -1,6 +1,6 @@
 import { useCountdown } from '../hooks/useCountdown.js';
 
-const TARGET_DATE = '2026-04-24T12:00:00';
+const TARGET_DATE = '2026-04-24T15:30:00';
 
 export default function CountdownSection() {
   const { days, hours, minutes, seconds } = useCountdown(TARGET_DATE);
